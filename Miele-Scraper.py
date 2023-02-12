@@ -49,6 +49,7 @@ for osku in model_list:
 
     header=str(bsObj.find('h1', class_='hdl hdl--display hdl--inverted'))
 
+    # If the item is not found, log it as missing and then move to the next product
     try:
         if 'Sorry' in header:
             print('updated as missing')
@@ -71,7 +72,7 @@ for osku in model_list:
     except:
         pass
 
-    #Arrays
+    # Arrays to store product data
     spec_names_list=[]
     spec_values_list=[]
     doc_names_list=[]
@@ -81,7 +82,7 @@ for osku in model_list:
     features_descriptions_list=[]
     features_images_list=[]
 
-    #Other
+    # Other variables 
     category_name=''
     product_xml='<item>'
     specifications_xml='<specifications>'
@@ -89,19 +90,19 @@ for osku in model_list:
     images_xml='<images>'
     features_xml='<features>'
 
-    #Product Name
+    # Product Name
     product_name=''
 
-    #Internet ID
+    # Internet ID
     internet_id=bsObj.find('h1', {'itemprop':'name'}).get_text()
 
-    #Category
+    # Category
     navs = []
     navs = bsObj.findAll('li', class_='nav-breadcrumb__item')
     navs_len = len(navs) - 2
     category_name=navs[navs_len].get_text()
 
-    #Images
+    # Images
     images=[]
     for image in bsObj.find('div', class_='carousel carousel--buttons-on-hover carousel--initialized').findAll('span', class_='thumbnail-fixer'):
         images_source_list.append(image.find_next('img').get('src')\
@@ -137,7 +138,7 @@ for osku in model_list:
         features_descriptions_list.append('')
         features_images_list.appened('')
 
-    #Specifications
+    # Specifications
     try:
         for spec in bsObj.find('section', {'id': 'section03'}).findAll('tr'):
             spec_names_list.append(spec.find_next('td').get_text()[:50].replace('&', 'and'))
@@ -155,8 +156,8 @@ for osku in model_list:
         spec_values_list.append('')
 
 
-    #Documents
-    #User manual
+    # Documents
+    # User manual
     try:
         for doc in bsObj.findAll('div', class_='download-item bg-color-white'):
             doc_names_list.append(doc.find_next('div', class_='download-item__title').find_next('div').get_text())
@@ -195,7 +196,9 @@ for osku in model_list:
         i=i+1
     features_xml=features_xml+'\n </features>' \
                               ''
-    #Create XML
+    # Create XML
+    # All of the resulting data gets stored as HTML for ingestion into the website
+    # All scraped data gets placed into a standardized XML format
     product_xml=product_xml + '\n' +\
                 '<osku>'+osku[0]+'</osku>\n'+\
                 '<manuf_url>'+URL+'</manuf_url>\n'+\
@@ -208,6 +211,7 @@ for osku in model_list:
                 features_xml +\
                 '</item>'
 
+    # Insert the data into the database
     insert_sql='INSERT INTO tbl_scraped_data (osku, data_source_bid, data_xml, date_updated, date_first_checked, num_specs, num_images, num_features, num_documents) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)'
     sql_val=(osku[0], bid, product_xml, str(date.today()), str(date.today()), len(spec_names_list), len(images_source_list), len(features_titles_list), len(doc_names_list))
     mycursor.execute(insert_sql, sql_val)
