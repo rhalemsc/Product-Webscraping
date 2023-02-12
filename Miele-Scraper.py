@@ -7,7 +7,7 @@ import mysql.connector
 import requests
 import re
 
-#Establish connection to database and query to get a list of items
+# Establish connection to database and query to get a list of items
 mydb = mysql.connector.connect(
   host="123.123.12.1",
   user="1234",
@@ -31,7 +31,8 @@ model_list = [item for item in model_query]
 #Set bid here for this particular brand
 bid=33
 
-#Main loop to go through items list
+# Main loop to go through items list
+# We are searching the Miele site for items that we don't have data for
 for osku in model_list:
     URL='https://www.mieleusa.com/e/w-'+osku[1]+'-p'
     print('Working On', osku[0], URL, sep='\t')
